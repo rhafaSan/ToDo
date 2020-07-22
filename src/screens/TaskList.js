@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component} from 'react';
 import { View, Text, ImageBackground, StyleSheet, FlatList, TouchableOpacity, Platform } from 'react-native';
 
 import todayImage from '../../assets/imgs/today.jpg';
@@ -9,11 +9,13 @@ import 'moment/locale/pt-br'
 import commonStyles from '../commonStyles';
 
 import Task from '../components/Task'
+import AddTask from './AddTask'
 
 export default class TaskList extends Component {
 
   state = {
     showDoneTasks: true,
+    showAddTask: true,
     visibleTasks: [],
     tasks: [{
       id: Math.random(),
@@ -63,13 +65,16 @@ export default class TaskList extends Component {
     const today = moment().locale('pt-br').format('ddd, D [de] MMMM')
     return (
       <View style={styles.container}>
-        <ImageBackground source={todayImage} style={styles.background}>
-          <View style={styles.iconBar}>
-            <TouchableOpacity onPress={this.toggleFilter}>
-              <Icon name={this.state.showDoneTasks ? 'eye' : 'eye-slash'} size={20} 
-              color={commonStyles.colors.secondary} />
-            </TouchableOpacity>
-          </View>
+        <AddTask isVisible={this.state.showAddTask}
+        onCancel={()=> this.setState({showAddTask: false})} />
+          <ImageBackground source={todayImage} style={styles.background}>
+            <View style={styles.iconBar}>
+              <TouchableOpacity onPress={this.toggleFilter}>
+                <Icon name={this.state.showDoneTasks ? 'eye' : 'eye-slash'} size={20} 
+                color={commonStyles.colors.secondary} />
+              </TouchableOpacity>
+            </View>
+            
           <View style={styles.titleBar}> 
             <Text style={styles.title}>Hoje</Text>
             <Text style={styles.subTitle}>{today}</Text>  
