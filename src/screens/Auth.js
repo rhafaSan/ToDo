@@ -18,10 +18,10 @@ import { server, showError, showSuccess } from '../common'
 
 const initialState = {
     name: '',
-    email: '',
-    password: '',
+    email: 'rfg@gmail.com',
+    password: '123456',
     confirmPassword: '',
-    stageNew: true
+    stageNew: false
 }
 
 export default class Auth extends Component {
@@ -29,9 +29,18 @@ export default class Auth extends Component {
   state = {
     ...initialState
   }
+
+  signinOrsignup = () => {
+    if (this.state.stageNew) {
+      this.signup()
+    } else {
+      this.signin()
+    }
+  }
+
   signup = async () =>{
     try{
-      await axios.post(`${server}/sigup`,{
+      await axios.post(`${server}/signup`,{
         name: this.state.name,
         email: this.state.email,
         password: this.state.password,
@@ -46,16 +55,35 @@ export default class Auth extends Component {
     }
   }
 
-  signinOrsignup = () => {
-    if (this.state.stageNew) {
-      this.signup()
-    } else {
-      Alert.alert('Sucesso', 'Logar')
+  signin = async () => {
+    try{
+     const res = await axios.post(`${server}/signin`,{
+        email: this.state.email,
+        password: this.state.password
+      })
+
+      axios.defaults.headers.common['Authorization'] = `bearer ${res.data.token}`
+      this.props.navigation.navigate('Home')
+    }catch(e){
+      showError(e)
     }
   }
 
 
+
   render() {
+
+    const validations = []
+    validations.push(this.state.email && this.state.email.includes('@'))
+    validations.push(this.state.password && this.state.password.length >= 6)
+    
+    if(this.state.stageNew){
+      validations.push(this.state.name && this.state.name.trim().length >= 3)
+      validations.push(this.state.password === this.state.confirmPassword)
+    }
+
+    const validForm = validations.reduce((t, a) =>t && a )
+
     return (
       <ImageBackground source={backgroundImage}
         style={styles.background}>
@@ -86,14 +114,16 @@ export default class Auth extends Component {
 
           }
           <TouchableOpacity onPress={this.signinOrsignup}>
-            <View style={styles.button}>
+            <View style={[styles.button, validForm ? {} : {backgroundColor: '#aaa' }]}>
               <Text style={styles.buttonText}>
                 {this.state.stageNew ? 'Registrar' : 'Entrar'}
               </Text>
             </View>
           </TouchableOpacity>
         </View>
-        <TouchableOpacity style={{ padding: 10 }} onPress={() => this.setState({ stageNew: !this.state.stageNew })}>
+        <TouchableOpacity style={{ padding: 10 }} 
+        onPress={() => this.setState({ stageNew: !this.state.stageNew })}
+        disabled={!validForm}>
           <Text style={styles.buttonText}>
             {this.state.stageNew ? 'Já possui conta?' : 'Ainda não possui conta?'}
           </Text>
